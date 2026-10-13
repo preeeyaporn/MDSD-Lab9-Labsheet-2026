@@ -639,8 +639,6 @@ final pages = [
 ฝั่ง UI ไม่ได้รับผลกระทบ (Loose Coupling): หน้าจอ HomePage และ Widget อื่น ๆ ทั้งหมดไม่ต้องแก้ไขโค้ดเลยแม้แต่บรรทัดเดียว เพราะยังคงเรียกใช้ฟังก์ชันตามสัญญาเดิม (getItems() -> Future<List<Item>>) ได้ตามปกติ
 ```
 
----
-
 ## ส่วนที่ 6: "โพสต์ขายจริง" — เชื่อม MyDraftsPage เข้ากับ Storage และ Firestore
 
 ### ขั้นตอนที่ 6.1: **นักศึกษาเขียน Code เอง** — StorageService
@@ -695,9 +693,6 @@ final pages = [
 
 <img width="1906" height="1072" alt="image" src="https://github.com/user-attachments/assets/d911ae63-f97c-467b-b46f-040214a5ea1b" />
 
-
----
-
 ## ส่วนที่ 7 (Self-Study): สำรวจ Firebase Security Rules
 
 ส่วนนี้เป็นการศึกษาด้วยตนเองเพิ่มเติมจากที่กล่าวถึงสั้น ๆ ในเนื้อหาหัวข้อ 9.9 ไม่ใช่แกนหลักของใบงาน แต่**สำคัญมากสำหรับการทำแอปจริง**เพราะโค้ด Flutter ทั้งหมดที่เขียนมาในส่วนที่ 1-6 ยังไม่ได้ป้องกันไม่ให้ผู้ใช้คนหนึ่งแก้ไข/ลบประกาศของอีกคนหนึ่งเลย (เพียงแค่ UI ไม่มีปุ่มให้กดเท่านั้น ผู้ที่เขียนโค้ดเรียก Firestore เองโดยตรงยังทำได้อยู่)
@@ -726,9 +721,9 @@ service cloud.firestore {
 > ✅ **Checkpoint 7.1 (Self-Study)** ถ่ายภาพหน้าจอผลการทดลองทั้ง 2 กรณีใน Rules Playground เขียนอธิบายสั้น ๆ ว่าทำไม Client-side Validation (การไม่แสดงปุ่มแก้ไขให้เห็น) เพียงอย่างเดียวจึงไม่เพียงพอต่อความปลอดภัยของข้อมูลจริง
 <img width="1917" height="958" alt="image" src="https://github.com/user-attachments/assets/c656a723-52cf-4c1b-bec3-1efef6d90293" />
 <img width="1917" height="956" alt="image" src="https://github.com/user-attachments/assets/6e75ee9d-3dba-4bae-b78f-2c6b5097c6e5" />
-```
+
 เพราะการซ่อนปุ่มในหน้าจอแอปเป็นเพียงการป้องกันระดับหน้าตา (UI) เท่านั้น ผู้ไม่หวังดีสามารถดักจับ Request หรือเขียนโค้ดเรียก Firestore API ได้โดยตรงโดยไม่ต้องผ่านหน้าจอแอปเลย ดังนั้น ความปลอดภัยที่แท้จริงจึงต้องควบคุมที่ Server-side ผ่าน Firebase Security Rules เสมอ เพื่อให้ระบบหลังบ้านตรวจสอบสิทธิ์ผู้ใช้ (request.auth.uid == sellerId) ก่อนอนุญาตให้แก้ไขหรือลบข้อมูลทุกครั้ง
-```
+
 ---
 
 ## ส่วนที่ 8: ทดสอบสถานการณ์ Offline และสถานะการล็อกอิน
@@ -743,6 +738,7 @@ service cloud.firestore {
 4. เปิดเครือข่ายกลับมา แล้วลองกด "โพสต์ขายจริง" รายการเดิมอีกครั้ง — ควรสำเร็จตามปกติ
 
 > ✅ **Checkpoint 8.1** ถ่ายภาพหน้าจอผลการทดสอบทั้ง 4 ข้อ
+
  <img width="451" height="1003" alt="image" src="https://github.com/user-attachments/assets/b7c2526d-2c0c-43d0-b91f-d96149f43bec" />
  <img width="447" height="1005" alt="image" src="https://github.com/user-attachments/assets/35d9825d-e4ea-4bf9-95e6-3c1f26fce433" />
  <img width="455" height="1006" alt="image" src="https://github.com/user-attachments/assets/002b503f-09a9-4ced-9c1c-724bf73cfdc3" />
