@@ -383,9 +383,11 @@ avdmanager list avd
 
 > ✅ **Checkpoint 3.1** ทดสอบกดปุ่มเข้าสู่ระบบด้วย Google ด้วยบัญชี Google จริงของคุณ ถ่ายภาพหน้าจอตอนเลือกบัญชี Google และภาพหน้าจอ Firebase Console ที่แสดงว่ามีผู้ใช้ใหม่ Provider เป็น Google เพิ่มเข้ามา อธิบายว่า `idToken` กับ `accessToken` ที่ได้จาก Google นำไปใช้ทำอะไรต่อในขั้นตอนการยืนยันตัวตนกับ Firebase (อ้างอิงหัวข้อ 9.4)
 
-```text
-บันทึกรูปผลลัพธ์ที่นี่ และคำอธิบาย
-```
+<img width="446" height="1002" alt="image" src="https://github.com/user-attachments/assets/fb58124e-e3e0-417a-bb98-ecfa309e739c" />
+<img width="446" height="1006" alt="image" src="https://github.com/user-attachments/assets/e7b0c91c-adda-4794-a0c3-ee5173d5e978" />
+<img width="453" height="1001" alt="image" src="https://github.com/user-attachments/assets/b00ca3d0-2b54-4239-b852-5218de508e09" />
+<img width="1916" height="1070" alt="image" src="https://github.com/user-attachments/assets/86bccb2a-85ec-4782-9a50-64e785b79b00" />
+
 
 ---
 
