@@ -743,12 +743,11 @@ service cloud.firestore {
 4. เปิดเครือข่ายกลับมา แล้วลองกด "โพสต์ขายจริง" รายการเดิมอีกครั้ง — ควรสำเร็จตามปกติ
 
 > ✅ **Checkpoint 8.1** ถ่ายภาพหน้าจอผลการทดสอบทั้ง 4 ข้อ
+ <img width="451" height="1003" alt="image" src="https://github.com/user-attachments/assets/b7c2526d-2c0c-43d0-b91f-d96149f43bec" />
+ <img width="447" height="1005" alt="image" src="https://github.com/user-attachments/assets/35d9825d-e4ea-4bf9-95e6-3c1f26fce433" />
+ <img width="455" height="1006" alt="image" src="https://github.com/user-attachments/assets/002b503f-09a9-4ced-9c1c-724bf73cfdc3" />
+ <img width="450" height="1007" alt="image" src="https://github.com/user-attachments/assets/12d2f8be-2df9-4318-8821-d3b6f2786212" />
  
-<img width="451" height="1003" alt="image" src="https://github.com/user-attachments/assets/b7c2526d-2c0c-43d0-b91f-d96149f43bec" />
-<img width="447" height="1005" alt="image" src="https://github.com/user-attachments/assets/35d9825d-e4ea-4bf9-95e6-3c1f26fce433" />
-<img width="455" height="1006" alt="image" src="https://github.com/user-attachments/assets/002b503f-09a9-4ced-9c1c-724bf73cfdc3" />
-<img width="450" height="1007" alt="image" src="https://github.com/user-attachments/assets/12d2f8be-2df9-4318-8821-d3b6f2786212" />
-
 ## ปัญหาที่พบบ่อยและวิธีแก้ไข (Troubleshooting)
 
 **Error `[core/no-app]` หรือ `Firebase has not been correctly initialized`** มักเกิดจากลืมเรียก `await Firebase.initializeApp(...)` ก่อน `runApp()` หรือลืม `WidgetsFlutterBinding.ensureInitialized()` ที่บรรทัดแรกสุดของ `main()` ตรวจสอบลำดับโค้ดในขั้นตอน 1.3 อีกครั้ง
