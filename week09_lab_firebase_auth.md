@@ -167,6 +167,10 @@ Future<void> main() async {
 <img width="1917" height="1132" alt="image" src="https://github.com/user-attachments/assets/bca08029-c481-4400-a12b-59ce860d2baa" />
 <img width="432" height="972" alt="image" src="https://github.com/user-attachments/assets/efff61c6-310b-4b04-893a-9639b1772a64" />
 
+คำอธิบาย:
+โค้ดใน `lib/services/auth_service.dart` จัดการข้อผิดพลาดผ่าน `try-catch` ที่ดักจับ `FirebaseAuthException`:
+- กรณี (ก) สมัครซ้ำด้วย Email เดิม: Firebase จะส่ง `e.code == 'email-already-in-use'` ซึ่งโค้ดแปลงเป็นข้อความภาษาไทย "อีเมลนี้ถูกใช้งานไปแล้ว"
+- กรณี (ข) รหัสผ่านสั้นเกินไป: Firebase จะส่ง `e.code == 'weak-password'` ซึ่งโค้ดแปลงเป็นข้อความภาษาไทย "รหัสผ่านต้องมีความยาวอย่างน้อย 6 ตัวอักษร"
 
 ---
 
@@ -388,6 +392,9 @@ avdmanager list avd
 <img width="453" height="1001" alt="image" src="https://github.com/user-attachments/assets/b00ca3d0-2b54-4239-b852-5218de508e09" />
 <img width="1916" height="1070" alt="image" src="https://github.com/user-attachments/assets/86bccb2a-85ec-4782-9a50-64e785b79b00" />
 
+คำอธิบาย:
+- `idToken`: เป็น JSON Web Token (JWT) ที่ออกและเซ็นชื่อรับรองโดย Google เพื่อยืนยันตัวตนของผู้ใช้ (User Identity) ว่าผู้ใช้นี้ได้ผ่านการล็อกอินด้วย Google Account จริง โค้ดนำ `idToken` ไปส่งให้ `GoogleAuthProvider.credential(idToken: ..., accessToken: ...)` เพื่อให้ Firebase Authentication ตรวจสอบความถูกต้องและสร้าง/เชื่อมต่อบัญชี Firebase User ให้กับผู้ใช้นั้น
+- `accessToken`: เป็นโทเคนสิทธิ์ในการเข้าถึง API บริการต่าง ๆ ของ Google (OAuth 2.0 Access Token) ใช้ควบคู่กันในการยืนยันสิทธิ์กับ Firebase Server
 
 ---
 
@@ -523,17 +530,24 @@ Widget build(BuildContext context) {
 เพิ่มปุ่ม "ออกจากระบบ" ใน AppBar ของ `HomePage` ที่เรียก `AuthService().signOut()`
 
 > ✅ **Checkpoint 4.1** ถ่ายภาพหน้าจอ 3 ภาพเรียงกัน คือ (ก) แอปตอนเพิ่งเปิดขึ้นมาครั้งแรกแบบยังไม่ล็อกอิน แสดงหน้า Login (ข) หลังล็อกอินสำเร็จ แอปสลับไปแสดง `MainScaffold` อัตโนมัติโดยไม่ต้องกดอะไรเพิ่ม และ (ค) หลังกด "ออกจากระบบ" แอปสลับกลับไปหน้า Login เอง อธิบายว่าทำไมการใช้ `StreamBuilder` ฟัง `authStateChanges()` จึงทำให้ไม่ต้องเขียนโค้ดสั่ง Navigate ไปมาเอง
+
+
 (ก) แอปตอนเพิ่งเปิดขึ้นมาครั้งแรกแบบยังไม่ล็อกอิน แสดงหน้า Login
 <img width="447" height="1011" alt="Screenshot 2026-10-13 150904" src="https://github.com/user-attachments/assets/5abd3930-22dd-4006-aff8-7f1bed81fa05" />
+
 (ข) หลังล็อกอินสำเร็จ แอปสลับไปแสดง `MainScaffold` อัตโนมัติโดยไม่ต้องกดอะไรเพิ่ม
 <img width="445" height="1003" alt="Screenshot 2026-10-13 150939" src="https://github.com/user-attachments/assets/f5403557-6907-4e2d-be51-bb2bbddf348d" />
+
 (ค) หลังกด "ออกจากระบบ" แอปสลับกลับไปหน้า Login เอง
 <img width="447" height="1005" alt="Screenshot 2026-10-13 151017" src="https://github.com/user-attachments/assets/e302437c-c9ee-4347-9c5f-9dc6ebf3e21e" />
-FirebaseAuth.instance.authStateChanges() ทำหน้าที่เป็น Stream ที่คอยตรวจจับและยิง Event ออกมาแบบ Real-time ทุกครั้งที่สถานะการยืนยันตัวตนเปลี่ยนไป (เช่น เมื่อเข้าสู่ระบบสำเร็จ จะส่งอ็อบเจกต์ User ออกมา หรือเมื่อกดออกจากระบบ จะส่งค่า null ออกมา)
-StreamBuilder จะคอย Subscribe ฟัง Stream ดังกล่าว และจะสั่งเรียกฟังก์ชัน builder เพื่อ Re-build Widget ต้นไม้ใหม่โดยอัตโนมัติทุกครั้งที่มีค่าใหม่เข้ามา
-ถ้าค่าเป็น null ➔ จะเรนเดอร์หน้า LoginPage
-ถ้ามีข้อมูล User ➔ จะเรนเดอร์หน้า MainScaffold
-โครงสร้างนี้ช่วยแยกความรับผิดชอบ (Separation of Concerns) ทำให้หน้าจอ LoginPage และหน้าจออื่น ๆ ไม่จำเป็นต้องจัดการ Route Stack หรือเขียน Navigator.push() / Navigator.pop() ด้วยตนเองเลย ลดปัญหา Navigation ซ้ำซ้อนและทำให้การแสดงผลตรงตามสถานะการล็อกอินจริงของ Firebase ตลอดเวลา
+
+คำอธิบาย:
+`FirebaseAuth.instance.authStateChanges()` ทำหน้าที่เป็น Stream ที่คอยตรวจจับและส่งสถานะการยืนยันตัวตนออกมาแบบ Real-time ทุกครั้งที่มีการเปลี่ยนแปลง (เมื่อเข้าสู่ระบบสำเร็จ จะส่งอ็อบเจกต์ User ออกมา และเมื่อกดออกจากระบบ จะส่งค่า null ออกมา)
+`StreamBuilder` จะ Subscribe ฟัง Stream นี้และ Re-build Widget Tree ใหม่โดยอัตโนมัติ:
+- ถ้าค่าเป็น null ➔ เรนเดอร์หน้า `LoginPage`
+- ถ้ามีข้อมูล User ➔ เรนเดอร์หน้า `MainScaffold`
+
+โครงสร้างนี้ทำให้หน้าจอต่าง ๆ ไม่ต้องสั่ง Navigate ด้วยตนเอง (`Navigator.push`/`pop`) จึงแยกความรับผิดชอบได้อย่างเป็นระเบียบและลดข้อผิดพลาดของ Navigation Stack ได้อย่างสมบูรณ์
 
 ---
 
@@ -544,16 +558,19 @@ StreamBuilder จะคอย Subscribe ฟัง Stream ดังกล่า�
 ก่อนเขียนโค้ด ให้ตอบคำถามต่อไปนี้ (อ้างอิง `campus_marketplace_lab_roadmap.md` ข้อ 5.6 และเนื้อหาหัวข้อ 9.5):
 
 1. ทำไมเราจึง "เพิ่ม Implementation ใหม่" (`ItemRepositoryFirestore`) แทนที่จะแก้ไข `ItemRepositoryApi` เดิม หรือเขียนโค้ดเรียก Firestore ตรงจาก `HomePage`?
-   ```
-   หลักการ Open-Closed Principle (OCP ใน SOLID): ซอฟต์แวร์ที่ดีควร "เปิดให้ต่อขยายความสามารถใหม่ (Open for extension) แต่ปิดไม่ให้แก้ไขโค้ดเดิมที่ทำงานได้ถูกต้องอยู่แล้ว (Closed for modification)" การสร้าง ItemRepositoryFirestore ขึ้นมาใหม่ช่วยให้เราเพิ่มแหล่งข้อมูลจาก Firestore ได้ โดยไม่ต้องเสี่ยงไปทำให้โค้ดของ ItemRepositoryApi เดิมพังเสียหาย
-การแยกหน้าที่ความรับผิดชอบ (Single Responsibility Principle): การดึงข้อมูลจาก REST API (Fake Store API) และ Cloud Firestore มีกลไก, SDK และ Error Handling ที่แตกต่างกันโดยสิ้นเชิง การแยกคลาสทำให้โค้ดเป็นสัดส่วน ดูแลรักษาและทดสอบได้ง่าย
-การหลีกเลี่ยง Tight Coupling (ไม่ผูกติด UI กับ Data Source): หากเขียนโค้ดเรียก Firestore ตรงใน HomePage จะทำให้ Widget ผูกติดกับเทคโนโลยีของ Firebase อย่างเหนียวแน่น หากในอนาคตต้องการเปลี่ยนฐานข้อมูลหรือ Mock ข้อมูลสำหรับทำ Unit/Widget Test จะต้องรื้อหน้าจอใหม่ทั้งหมด แต่การใช้ Repository Pattern ทำให้ HomePage รู้จักเพียง Interface ItemRepository และรับ List<Item> เท่านั้นโดยไม่ต้องสนใจว่าข้อมูลมาจากไหน
-   ```
 2. ถ้าในอนาคตอาจารย์สั่งให้เปลี่ยนจาก Fake Store API ไปใช้ API อื่น ต้องแก้ไฟล์กี่ไฟล์ ถ้าทุก Widget เรียกผ่าน Interface `ItemRepository` เท่านั้น?
+
 ```text
-Repository ไฟล์เดียว (1 ไฟล์): แก้ไขที่ lib/repositories/item_repository_api.dart ให้เรียก URL/รูปแบบข้อมูลของ API ตัวใหม่ (หรือสร้าง Repository ใหม่ที่ implements ItemRepository)
-จุด Dependency Injection (1 ไฟล์): ปรับใน lib/main.dart ให้ส่ง Repository ตัวใหม่เข้าไปในแอป
-ไฟล์ UI ทั้งหมด (เช่น HomePage, MainScaffold, ฯลฯ) ไม่ต้องแก้ไขโค้ดเลยแม้แต่ไฟล์เดียว (0 ไฟล์) เพราะทุก Widget สื่อสารผ่านสัญญาของ Interface ItemRepository ตัวเดิม
+1. ทำไมเราจึง "เพิ่ม Implementation ใหม่" (ItemRepositoryFirestore) แทนที่จะแก้ไข ItemRepositoryApi เดิม หรือเขียนโค้ดเรียก Firestore ตรงจาก HomePage?:
+- ตามหลักการ Open-Closed Principle (OCP ใน SOLID Principles) ซอฟต์แวร์ควรเปิดให้ขยายความสามารถใหม่ (Open for extension) แต่ปิดไม่ให้แก้ไขโค้ดเดิมที่ทำงานได้ถูกต้องอยู่แล้ว (Closed for modification) การสร้าง ItemRepositoryFirestore เป็นคลาสใหม่ทำให้เราไม่ต้องเสี่ยงทำให้โค้ด ItemRepositoryApi เดิมเสียหาย
+- แยกหน้าที่ความรับผิดชอบ (Single Responsibility Principle) ชัดเจนระหว่างการเรียก REST API และ Cloud Firestore
+- หลีกเลี่ยง Tight Coupling ระหว่าง UI กับ Data Source: หากเรียก Firestore ตรงจาก HomePage จะทำให้ Widget ผูกติดกับ Firestore อย่างแน่นหนา แต่การใช้ Repository Pattern ทำให้ HomePage ขึ้นต่อกับ Interface ItemRepository เท่านั้น ส่งผลให้ง่ายต่อการ Mock ข้อมูลเพื่อทำ Unit Test และสลับแหล่งข้อมูลในอนาคต
+
+2. ถ้าในอนาคตอาจารย์สั่งให้เปลี่ยนจาก Fake Store API ไปใช้ API อื่น ต้องแก้ไฟล์กี่ไฟล์ ถ้าทุก Widget เรียกผ่าน Interface ItemRepository เท่านั้น?:
+- แก้เพียง 1-2 ไฟล์เท่านั้น คือ:
+  1) ไฟล์ Repository: แก้ไขโค้ดใน ItemRepositoryApi.dart ให้เรียก API ใหม่ หรือสร้างคลาส Repository ใหม่ที่ implements ItemRepository (1 ไฟล์)
+  2) จุด Dependency Injection: เช่น ใน lib/main.dart เพื่อส่ง Repository ตัวใหม่เข้าไปใน AuthGate/MainScaffold (1 ไฟล์)
+- ส่วนไฟล์ UI ทั้งหมด (เช่น HomePage, MainScaffold) ไม่ต้องแก้ไขโค้ดเลยแม้แต่ไฟล์เดียว (0 ไฟล์) เพราะทุก Widget สื่อสารผ่าน Interface ItemRepository ตัวเดิม
 ```
 
 ### ขั้นตอนที่ 5.2: **นักศึกษาเขียน Code เอง** — ItemRepositoryFirestore
@@ -626,18 +643,13 @@ final pages = [
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอ Home ที่แสดงสินค้าจากทั้งสองแหล่งข้อมูลปนกันอยู่ในลิสต์เดียว พร้อม Badge ที่แยกแหล่งที่มาชัดเจน (ถ้ายังไม่เคยมีประกาศจริงใน Firestore เลย ให้ทำส่วนที่ 6 ให้เสร็จก่อนแล้วย้อนกลับมาถ่ายภาพ Checkpoint นี้) อธิบายว่าการออกแบบให้ `HomePage` ไม่รู้จัก `ItemRepositoryApi`/`ItemRepositoryFirestore` โดยตรง แต่รู้จักผ่าน Interface `ItemRepository` เท่านั้น ช่วยให้ทดสอบหรือเปลี่ยนแหล่งข้อมูลในอนาคตง่ายขึ้นอย่างไร
 
 <img width="446" height="981" alt="image" src="https://github.com/user-attachments/assets/5449287f-8d55-4ad8-8f67-c3c8c1bf974e" />
-```
-การออกแบบให้ HomePage สื่อสารผ่าน Interface ItemRepository แทนที่จะเรียกใช้ ItemRepositoryApi หรือ ItemRepositoryFirestore โดยตรง (ตามหลักการ Repository Pattern และ Dependency Inversion Principle (DIP) ในกลุ่ม SOLID Principles) ให้ประโยชน์สำคัญ 2 ด้านดังนี้:
 
-ช่วยให้การทดสอบ (Testing) ทำได้ง่าย รวดเร็ว และแม่นยำ:
+คำอธิบาย:
+การออกแบบให้ `HomePage` ไม่รู้จัก `ItemRepositoryApi` หรือ `ItemRepositoryFirestore` โดยตรง แต่ติดต่อผ่าน Interface `ItemRepository` เท่านั้น (ตามหลักการ Dependency Inversion Principle และ Repository Pattern) ส่งผลดีต่อระบบ 2 ด้านหลักดังนี้:
+1. ด้านการทดสอบ (Testability): ทำให้สามารถทำ Widget Test หรือ Unit Test ได้อย่างอิสระและรวดเร็ว โดยสร้าง Mock/Fake Repository (เช่น `_FakeItemRepository implements ItemRepository`) ส่งให้ `HomePage` ทดสอบหน้าจอและสถานะต่าง ๆ ได้โดยไม่ต้องต่อเน็ตจริง ไม่ต้องพึ่งพา Fake Store API หรือ Firebase จริง
+2. ด้านการบำรุงรักษาและการขยายระบบในอนาคต (Maintainability & Extensibility): สอดคล้องกับหลักการ Open-Closed Principle (OCP) หากในอนาคตต้องการเปลี่ยนระบบหลังบ้านจาก Firestore ไปเป็น API อื่น หรือเพิ่มแหล่งข้อมูลใหม่ เราเพียงสร้างคลาสใหม่ที่ `implements ItemRepository` แล้วนำมาส่งให้แอปใน `main.dart` โดยที่โค้ดใน `HomePage` และ Widget อื่น ๆ ทั้งหมดไม่ต้องแก้ไขเลยแม้แต่บรรทัดเดียว
 
-การจำลองข้อมูล (Mocking): ในการทำ Widget Test หรือ Unit Test เราสามารถสร้างคลาสจำลอง เช่น FakeItemRepository implements ItemRepository เพื่อส่งชุดข้อมูลทดสอบ (Mock Data) หรือจำลองสถานะ Error ให้กับ HomePage ได้ทันที
-ไม่ต้องพึ่งพาเซิร์ฟเวอร์จริง: การทดสอบสามารถทำงานแบบ Offline ได้โดยไม่ต้องต่อ Fake Store API หรือ Cloud Firestore จริง ทำให้ Test รันเสร็จอย่างรวดเร็วและผลการทดสอบมีความเสถียร ไม่พังตามปัญหาเครือข่ายอินเทอร์เน็ต
-ช่วยให้การเปลี่ยนหรือขยายแหล่งข้อมูลในอนาคตทำได้ง่าย (Maintainability & Extensibility):
-
-สอดคล้องกับ Open-Closed Principle (OCP): หากในอนาคตต้องการเปลี่ยนระบบหลังบ้านจาก Fake Store API ไปใช้ API อื่น หรือขยายไปใช้ฐานข้อมูลระบบอื่น (เช่น Supabase หรือ GraphQL) เราเพียงแค่สร้างคลาสใหม่ที่ implements ItemRepository แล้วเปลี่ยนจุดส่ง Dependency ใน main.dart เพียงไฟล์เดียว
-ฝั่ง UI ไม่ได้รับผลกระทบ (Loose Coupling): หน้าจอ HomePage และ Widget อื่น ๆ ทั้งหมดไม่ต้องแก้ไขโค้ดเลยแม้แต่บรรทัดเดียว เพราะยังคงเรียกใช้ฟังก์ชันตามสัญญาเดิม (getItems() -> Future<List<Item>>) ได้ตามปกติ
-```
+---
 
 ## ส่วนที่ 6: "โพสต์ขายจริง" — เชื่อม MyDraftsPage เข้ากับ Storage และ Firestore
 
@@ -688,10 +700,11 @@ final pages = [
 <img width="447" height="1003" alt="image" src="https://github.com/user-attachments/assets/016ad003-1e15-414f-a008-d6833047f92e" />
 <img width="450" height="1000" alt="image" src="https://github.com/user-attachments/assets/5e8c8e56-e5a4-4a01-99cd-464a727811bd" />
 
-
 > ✅ **Checkpoint 6.2** ถ่ายภาพหน้าจอ Firebase Console เมนู Storage ที่แสดงไฟล์รูปภาพที่อัปโหลดสำเร็จ และภาพหน้าจอ Firestore ที่แสดงว่าเอกสารมี field `imageUrl` เป็น URL จริงที่เปิดดูได้ ถ่ายภาพหน้าจอแอปที่แสดงรูปสินค้านั้นบนหน้า Home ผ่าน `Image.network(imageUrl)` ด้วย (ย้อนกลับไปถ่ายภาพ Checkpoint 5.1 ให้ครบตอนนี้ ถ้ายังไม่ได้ทำ)
 
 <img width="1906" height="1072" alt="image" src="https://github.com/user-attachments/assets/d911ae63-f97c-467b-b46f-040214a5ea1b" />
+
+---
 
 ## ส่วนที่ 7 (Self-Study): สำรวจ Firebase Security Rules
 
@@ -719,10 +732,14 @@ service cloud.firestore {
 > ⚠️ ถ้า Checkpoint 6.1 ยังไม่เคยโพสต์ผ่านมาก่อนเลย ให้ Publish Rules นี้ **หลังจาก** โพสต์ขายจริงสำเร็จไปแล้วอย่างน้อย 1 รายการ เพราะ Rules ชุดนี้บังคับว่าต้องมี `sellerId` ตรงกับผู้เขียนเสมอ ถ้าโค้ดในส่วนที่ 6 ยังไม่แนบ `sellerId` ให้ถูกต้อง การโพสต์ครั้งต่อไปจะล้มเหลวด้วย `permission-denied` ทันที
 
 > ✅ **Checkpoint 7.1 (Self-Study)** ถ่ายภาพหน้าจอผลการทดลองทั้ง 2 กรณีใน Rules Playground เขียนอธิบายสั้น ๆ ว่าทำไม Client-side Validation (การไม่แสดงปุ่มแก้ไขให้เห็น) เพียงอย่างเดียวจึงไม่เพียงพอต่อความปลอดภัยของข้อมูลจริง
+
 <img width="1917" height="958" alt="image" src="https://github.com/user-attachments/assets/c656a723-52cf-4c1b-bec3-1efef6d90293" />
 <img width="1917" height="956" alt="image" src="https://github.com/user-attachments/assets/6e75ee9d-3dba-4bae-b78f-2c6b5097c6e5" />
 
-เพราะการซ่อนปุ่มในหน้าจอแอปเป็นเพียงการป้องกันระดับหน้าตา (UI) เท่านั้น ผู้ไม่หวังดีสามารถดักจับ Request หรือเขียนโค้ดเรียก Firestore API ได้โดยตรงโดยไม่ต้องผ่านหน้าจอแอปเลย ดังนั้น ความปลอดภัยที่แท้จริงจึงต้องควบคุมที่ Server-side ผ่าน Firebase Security Rules เสมอ เพื่อให้ระบบหลังบ้านตรวจสอบสิทธิ์ผู้ใช้ (request.auth.uid == sellerId) ก่อนอนุญาตให้แก้ไขหรือลบข้อมูลทุกครั้ง
+คำอธิบาย:
+Client-side Validation (เช่น การซ่อนปุ่มแก้ไข/ลบในหน้าจอแอป Flutter ไม่ให้ผู้ใช้คนอื่นเห็น) เพียงอย่างเดียวไม่เพียงพอต่อความปลอดภัยของข้อมูลจริง เนื่องจาก:
+1. การตรวจสอบบน Client อยู่ภายใต้การควบคุมของผู้ใช้งาน ซึ่งผู้ไม่หวังดีสามารถดักจับ Request (Network Interception), ดัดแปลงโค้ดแอป (Reverse Engineering), หรือเขียนสคริปต์ยิงคำขอตรงไปยัง Firestore REST API/SDK โดยไม่ผ่านหน้าจอ UI ของแอปเลย
+2. กฎความปลอดภัยที่แท้จริงต้องอยู่ที่ฝั่ง Server-side ผ่าน Firebase Security Rules เสมอ เพื่อให้ทุกคำขอที่เข้ามายังฐานข้อมูลถูกตรวจสอบสิทธิ์และยืนยันตัวตน (Authentication & Authorization) ว่า request.auth.uid ตรงกับ sellerId ของข้อมูลนั้นจริงก่อนจะอนุญาตให้อ่าน เขียน หรือแก้ไขข้อมูล
 
 ---
 
@@ -737,13 +754,15 @@ service cloud.firestore {
 3. ขณะยังปิดเครือข่ายอยู่ ลองกด "โพสต์ขายจริง" กับร่างสักชิ้น — ควรเกิด Error เพราะ Firestore/Storage ต้องการเครือข่ายเสมอ (ต่างจาก Local Database) ตรวจสอบว่าแอปแสดงข้อความ Error ที่เข้าใจได้ ไม่ Crash
 4. เปิดเครือข่ายกลับมา แล้วลองกด "โพสต์ขายจริง" รายการเดิมอีกครั้ง — ควรสำเร็จตามปกติ
 
-> ✅ **Checkpoint 8.1** ถ่ายภาพหน้าจอผลการทดสอบทั้ง 4 ข้อ
+> ✅ **Checkpoint 8.1** ถ่ายภาพหน้าจอผลการทดสอบทั้ง 4 ข้อ 
 
- <img width="451" height="1003" alt="image" src="https://github.com/user-attachments/assets/b7c2526d-2c0c-43d0-b91f-d96149f43bec" />
- <img width="447" height="1005" alt="image" src="https://github.com/user-attachments/assets/35d9825d-e4ea-4bf9-95e6-3c1f26fce433" />
- <img width="455" height="1006" alt="image" src="https://github.com/user-attachments/assets/002b503f-09a9-4ced-9c1c-724bf73cfdc3" />
- <img width="450" height="1007" alt="image" src="https://github.com/user-attachments/assets/12d2f8be-2df9-4318-8821-d3b6f2786212" />
- 
+<img width="451" height="1003" alt="image" src="https://github.com/user-attachments/assets/b7c2526d-2c0c-43d0-b91f-d96149f43bec" />
+<img width="447" height="1005" alt="image" src="https://github.com/user-attachments/assets/35d9825d-e4ea-4bf9-95e6-3c1f26fce433" />
+<img width="455" height="1006" alt="image" src="https://github.com/user-attachments/assets/002b503f-09a9-4ced-9c1c-724bf73cfdc3" />
+<img width="450" height="1007" alt="image" src="https://github.com/user-attachments/assets/12d2f8be-2df9-4318-8821-d3b6f2786212" />
+
+---
+
 ## ปัญหาที่พบบ่อยและวิธีแก้ไข (Troubleshooting)
 
 **Error `[core/no-app]` หรือ `Firebase has not been correctly initialized`** มักเกิดจากลืมเรียก `await Firebase.initializeApp(...)` ก่อน `runApp()` หรือลืม `WidgetsFlutterBinding.ensureInitialized()` ที่บรรทัดแรกสุดของ `main()` ตรวจสอบลำดับโค้ดในขั้นตอน 1.3 อีกครั้ง
