@@ -523,11 +523,17 @@ Widget build(BuildContext context) {
 เพิ่มปุ่ม "ออกจากระบบ" ใน AppBar ของ `HomePage` ที่เรียก `AuthService().signOut()`
 
 > ✅ **Checkpoint 4.1** ถ่ายภาพหน้าจอ 3 ภาพเรียงกัน คือ (ก) แอปตอนเพิ่งเปิดขึ้นมาครั้งแรกแบบยังไม่ล็อกอิน แสดงหน้า Login (ข) หลังล็อกอินสำเร็จ แอปสลับไปแสดง `MainScaffold` อัตโนมัติโดยไม่ต้องกดอะไรเพิ่ม และ (ค) หลังกด "ออกจากระบบ" แอปสลับกลับไปหน้า Login เอง อธิบายว่าทำไมการใช้ `StreamBuilder` ฟัง `authStateChanges()` จึงทำให้ไม่ต้องเขียนโค้ดสั่ง Navigate ไปมาเอง
-
-
-```text
-บันทึกรูปผลลัพธ์ที่นี่ (3 ภาพ) และคำอธิบาย
-```
+(ก) แอปตอนเพิ่งเปิดขึ้นมาครั้งแรกแบบยังไม่ล็อกอิน แสดงหน้า Login
+<img width="447" height="1011" alt="Screenshot 2026-10-13 150904" src="https://github.com/user-attachments/assets/5abd3930-22dd-4006-aff8-7f1bed81fa05" />
+(ข) หลังล็อกอินสำเร็จ แอปสลับไปแสดง `MainScaffold` อัตโนมัติโดยไม่ต้องกดอะไรเพิ่ม
+<img width="445" height="1003" alt="Screenshot 2026-10-13 150939" src="https://github.com/user-attachments/assets/f5403557-6907-4e2d-be51-bb2bbddf348d" />
+(ค) หลังกด "ออกจากระบบ" แอปสลับกลับไปหน้า Login เอง
+<img width="447" height="1005" alt="Screenshot 2026-10-13 151017" src="https://github.com/user-attachments/assets/e302437c-c9ee-4347-9c5f-9dc6ebf3e21e" />
+FirebaseAuth.instance.authStateChanges() ทำหน้าที่เป็น Stream ที่คอยตรวจจับและยิง Event ออกมาแบบ Real-time ทุกครั้งที่สถานะการยืนยันตัวตนเปลี่ยนไป (เช่น เมื่อเข้าสู่ระบบสำเร็จ จะส่งอ็อบเจกต์ User ออกมา หรือเมื่อกดออกจากระบบ จะส่งค่า null ออกมา)
+StreamBuilder จะคอย Subscribe ฟัง Stream ดังกล่าว และจะสั่งเรียกฟังก์ชัน builder เพื่อ Re-build Widget ต้นไม้ใหม่โดยอัตโนมัติทุกครั้งที่มีค่าใหม่เข้ามา
+ถ้าค่าเป็น null ➔ จะเรนเดอร์หน้า LoginPage
+ถ้ามีข้อมูล User ➔ จะเรนเดอร์หน้า MainScaffold
+โครงสร้างนี้ช่วยแยกความรับผิดชอบ (Separation of Concerns) ทำให้หน้าจอ LoginPage และหน้าจออื่น ๆ ไม่จำเป็นต้องจัดการ Route Stack หรือเขียน Navigator.push() / Navigator.pop() ด้วยตนเองเลย ลดปัญหา Navigation ซ้ำซ้อนและทำให้การแสดงผลตรงตามสถานะการล็อกอินจริงของ Firebase ตลอดเวลา
 
 ---
 
@@ -538,10 +544,16 @@ Widget build(BuildContext context) {
 ก่อนเขียนโค้ด ให้ตอบคำถามต่อไปนี้ (อ้างอิง `campus_marketplace_lab_roadmap.md` ข้อ 5.6 และเนื้อหาหัวข้อ 9.5):
 
 1. ทำไมเราจึง "เพิ่ม Implementation ใหม่" (`ItemRepositoryFirestore`) แทนที่จะแก้ไข `ItemRepositoryApi` เดิม หรือเขียนโค้ดเรียก Firestore ตรงจาก `HomePage`?
+   ```
+   หลักการ Open-Closed Principle (OCP ใน SOLID): ซอฟต์แวร์ที่ดีควร "เปิดให้ต่อขยายความสามารถใหม่ (Open for extension) แต่ปิดไม่ให้แก้ไขโค้ดเดิมที่ทำงานได้ถูกต้องอยู่แล้ว (Closed for modification)" การสร้าง ItemRepositoryFirestore ขึ้นมาใหม่ช่วยให้เราเพิ่มแหล่งข้อมูลจาก Firestore ได้ โดยไม่ต้องเสี่ยงไปทำให้โค้ดของ ItemRepositoryApi เดิมพังเสียหาย
+การแยกหน้าที่ความรับผิดชอบ (Single Responsibility Principle): การดึงข้อมูลจาก REST API (Fake Store API) และ Cloud Firestore มีกลไก, SDK และ Error Handling ที่แตกต่างกันโดยสิ้นเชิง การแยกคลาสทำให้โค้ดเป็นสัดส่วน ดูแลรักษาและทดสอบได้ง่าย
+การหลีกเลี่ยง Tight Coupling (ไม่ผูกติด UI กับ Data Source): หากเขียนโค้ดเรียก Firestore ตรงใน HomePage จะทำให้ Widget ผูกติดกับเทคโนโลยีของ Firebase อย่างเหนียวแน่น หากในอนาคตต้องการเปลี่ยนฐานข้อมูลหรือ Mock ข้อมูลสำหรับทำ Unit/Widget Test จะต้องรื้อหน้าจอใหม่ทั้งหมด แต่การใช้ Repository Pattern ทำให้ HomePage รู้จักเพียง Interface ItemRepository และรับ List<Item> เท่านั้นโดยไม่ต้องสนใจว่าข้อมูลมาจากไหน
+   ```
 2. ถ้าในอนาคตอาจารย์สั่งให้เปลี่ยนจาก Fake Store API ไปใช้ API อื่น ต้องแก้ไฟล์กี่ไฟล์ ถ้าทุก Widget เรียกผ่าน Interface `ItemRepository` เท่านั้น?
-
 ```text
-บันทึกคำตอบของคุณที่นี่
+Repository ไฟล์เดียว (1 ไฟล์): แก้ไขที่ lib/repositories/item_repository_api.dart ให้เรียก URL/รูปแบบข้อมูลของ API ตัวใหม่ (หรือสร้าง Repository ใหม่ที่ implements ItemRepository)
+จุด Dependency Injection (1 ไฟล์): ปรับใน lib/main.dart ให้ส่ง Repository ตัวใหม่เข้าไปในแอป
+ไฟล์ UI ทั้งหมด (เช่น HomePage, MainScaffold, ฯลฯ) ไม่ต้องแก้ไขโค้ดเลยแม้แต่ไฟล์เดียว (0 ไฟล์) เพราะทุก Widget สื่อสารผ่านสัญญาของ Interface ItemRepository ตัวเดิม
 ```
 
 ### ขั้นตอนที่ 5.2: **นักศึกษาเขียน Code เอง** — ItemRepositoryFirestore
@@ -613,8 +625,18 @@ final pages = [
 
 > ✅ **Checkpoint 5.1** ถ่ายภาพหน้าจอ Home ที่แสดงสินค้าจากทั้งสองแหล่งข้อมูลปนกันอยู่ในลิสต์เดียว พร้อม Badge ที่แยกแหล่งที่มาชัดเจน (ถ้ายังไม่เคยมีประกาศจริงใน Firestore เลย ให้ทำส่วนที่ 6 ให้เสร็จก่อนแล้วย้อนกลับมาถ่ายภาพ Checkpoint นี้) อธิบายว่าการออกแบบให้ `HomePage` ไม่รู้จัก `ItemRepositoryApi`/`ItemRepositoryFirestore` โดยตรง แต่รู้จักผ่าน Interface `ItemRepository` เท่านั้น ช่วยให้ทดสอบหรือเปลี่ยนแหล่งข้อมูลในอนาคตง่ายขึ้นอย่างไร
 
-```text
-บันทึกรูปผลลัพธ์ที่นี่ และคำอธิบาย
+<img width="446" height="981" alt="image" src="https://github.com/user-attachments/assets/5449287f-8d55-4ad8-8f67-c3c8c1bf974e" />
+```
+การออกแบบให้ HomePage สื่อสารผ่าน Interface ItemRepository แทนที่จะเรียกใช้ ItemRepositoryApi หรือ ItemRepositoryFirestore โดยตรง (ตามหลักการ Repository Pattern และ Dependency Inversion Principle (DIP) ในกลุ่ม SOLID Principles) ให้ประโยชน์สำคัญ 2 ด้านดังนี้:
+
+ช่วยให้การทดสอบ (Testing) ทำได้ง่าย รวดเร็ว และแม่นยำ:
+
+การจำลองข้อมูล (Mocking): ในการทำ Widget Test หรือ Unit Test เราสามารถสร้างคลาสจำลอง เช่น FakeItemRepository implements ItemRepository เพื่อส่งชุดข้อมูลทดสอบ (Mock Data) หรือจำลองสถานะ Error ให้กับ HomePage ได้ทันที
+ไม่ต้องพึ่งพาเซิร์ฟเวอร์จริง: การทดสอบสามารถทำงานแบบ Offline ได้โดยไม่ต้องต่อ Fake Store API หรือ Cloud Firestore จริง ทำให้ Test รันเสร็จอย่างรวดเร็วและผลการทดสอบมีความเสถียร ไม่พังตามปัญหาเครือข่ายอินเทอร์เน็ต
+ช่วยให้การเปลี่ยนหรือขยายแหล่งข้อมูลในอนาคตทำได้ง่าย (Maintainability & Extensibility):
+
+สอดคล้องกับ Open-Closed Principle (OCP): หากในอนาคตต้องการเปลี่ยนระบบหลังบ้านจาก Fake Store API ไปใช้ API อื่น หรือขยายไปใช้ฐานข้อมูลระบบอื่น (เช่น Supabase หรือ GraphQL) เราเพียงแค่สร้างคลาสใหม่ที่ implements ItemRepository แล้วเปลี่ยนจุดส่ง Dependency ใน main.dart เพียงไฟล์เดียว
+ฝั่ง UI ไม่ได้รับผลกระทบ (Loose Coupling): หน้าจอ HomePage และ Widget อื่น ๆ ทั้งหมดไม่ต้องแก้ไขโค้ดเลยแม้แต่บรรทัดเดียว เพราะยังคงเรียกใช้ฟังก์ชันตามสัญญาเดิม (getItems() -> Future<List<Item>>) ได้ตามปกติ
 ```
 
 ---
