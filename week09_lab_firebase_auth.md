@@ -687,15 +687,14 @@ final pages = [
 
 > ✅ **Checkpoint 6.1** โพสต์ขายจริงอย่างน้อย 2 รายการผ่านแอป ถ่ายภาพหน้าจอ Firebase Console เมนู Firestore Database ที่แสดง Collection `items` มีเอกสารที่โพสต์เข้ามาจริง พร้อม field `sellerId` ที่ตรงกับ `uid` ของบัญชีที่ใช้ทดสอบ และยืนยันว่าร่างทั้งสองรายการหายไปจาก `MyDraftsPage` แล้ว
 
-```text
-บันทึกรูปผลลัพธ์ที่นี่
-```
+<img width="447" height="1003" alt="image" src="https://github.com/user-attachments/assets/016ad003-1e15-414f-a008-d6833047f92e" />
+<img width="450" height="1000" alt="image" src="https://github.com/user-attachments/assets/5e8c8e56-e5a4-4a01-99cd-464a727811bd" />
+
 
 > ✅ **Checkpoint 6.2** ถ่ายภาพหน้าจอ Firebase Console เมนู Storage ที่แสดงไฟล์รูปภาพที่อัปโหลดสำเร็จ และภาพหน้าจอ Firestore ที่แสดงว่าเอกสารมี field `imageUrl` เป็น URL จริงที่เปิดดูได้ ถ่ายภาพหน้าจอแอปที่แสดงรูปสินค้านั้นบนหน้า Home ผ่าน `Image.network(imageUrl)` ด้วย (ย้อนกลับไปถ่ายภาพ Checkpoint 5.1 ให้ครบตอนนี้ ถ้ายังไม่ได้ทำ)
 
-```text
-บันทึกรูปผลลัพธ์ที่นี่
-```
+<img width="1906" height="1072" alt="image" src="https://github.com/user-attachments/assets/d911ae63-f97c-467b-b46f-040214a5ea1b" />
+
 
 ---
 
@@ -725,11 +724,11 @@ service cloud.firestore {
 > ⚠️ ถ้า Checkpoint 6.1 ยังไม่เคยโพสต์ผ่านมาก่อนเลย ให้ Publish Rules นี้ **หลังจาก** โพสต์ขายจริงสำเร็จไปแล้วอย่างน้อย 1 รายการ เพราะ Rules ชุดนี้บังคับว่าต้องมี `sellerId` ตรงกับผู้เขียนเสมอ ถ้าโค้ดในส่วนที่ 6 ยังไม่แนบ `sellerId` ให้ถูกต้อง การโพสต์ครั้งต่อไปจะล้มเหลวด้วย `permission-denied` ทันที
 
 > ✅ **Checkpoint 7.1 (Self-Study)** ถ่ายภาพหน้าจอผลการทดลองทั้ง 2 กรณีใน Rules Playground เขียนอธิบายสั้น ๆ ว่าทำไม Client-side Validation (การไม่แสดงปุ่มแก้ไขให้เห็น) เพียงอย่างเดียวจึงไม่เพียงพอต่อความปลอดภัยของข้อมูลจริง
-
-```text
-บันทึกรูปผลลัพธ์ที่นี่ และคำอธิบาย
+<img width="1917" height="958" alt="image" src="https://github.com/user-attachments/assets/c656a723-52cf-4c1b-bec3-1efef6d90293" />
+<img width="1917" height="956" alt="image" src="https://github.com/user-attachments/assets/6e75ee9d-3dba-4bae-b78f-2c6b5097c6e5" />
 ```
-
+เพราะการซ่อนปุ่มในหน้าจอแอปเป็นเพียงการป้องกันระดับหน้าตา (UI) เท่านั้น ผู้ไม่หวังดีสามารถดักจับ Request หรือเขียนโค้ดเรียก Firestore API ได้โดยตรงโดยไม่ต้องผ่านหน้าจอแอปเลย ดังนั้น ความปลอดภัยที่แท้จริงจึงต้องควบคุมที่ Server-side ผ่าน Firebase Security Rules เสมอ เพื่อให้ระบบหลังบ้านตรวจสอบสิทธิ์ผู้ใช้ (request.auth.uid == sellerId) ก่อนอนุญาตให้แก้ไขหรือลบข้อมูลทุกครั้ง
+```
 ---
 
 ## ส่วนที่ 8: ทดสอบสถานการณ์ Offline และสถานะการล็อกอิน
@@ -745,9 +744,10 @@ service cloud.firestore {
 
 > ✅ **Checkpoint 8.1** ถ่ายภาพหน้าจอผลการทดสอบทั้ง 4 ข้อ 
 
-```text
-บันทึกรูปผลลัพธ์ที่นี่ 
-```
+
+
+https://github.com/user-attachments/assets/2fd7e14a-ef2c-42b2-acd2-722a3b730484
+
 
 ---
 
